@@ -15,7 +15,7 @@ import {
 
 type Search = { formType?: string };
 
-export const Route = createFileRoute("/reports")({
+export const Route = createFileRoute("/reports/")({
   validateSearch: (search: Record<string, unknown>): Search => ({
     formType: typeof search.formType === "string" ? search.formType : undefined,
   }),
