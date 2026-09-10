@@ -265,9 +265,9 @@ function Dashboard() {
       {/* Charts row 2 */}
       <div className="mt-4 grid gap-4 lg:grid-cols-3">
         {[
-          { title: "Per Lokasi", data: byKey(locationName, "locationId") },
-          { title: "Per Area", data: byKey(areaName, "areaId") },
-          { title: "Per Shift", data: byKey(shiftName, "shiftId") },
+          { title: "By Location", data: byKey(locationName, "locationId") },
+          { title: "By Area", data: byKey(areaName, "areaId") },
+          { title: "By Shift", data: byKey(shiftName, "shiftId") },
         ].map((c) => (
           <Panel key={c.title} title={c.title}>
             {c.data.length === 0 ? (

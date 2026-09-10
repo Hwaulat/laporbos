@@ -62,7 +62,7 @@ function StatusToggle({ active, onToggle }: { active: boolean; onToggle: () => v
 
 const MENUS = [
   "Dashboard",
-  "Input Laporan",
+  "Submit Report",
   "Master Data",
   "Reports",
   "Questions",

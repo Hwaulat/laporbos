@@ -71,7 +71,7 @@ function UserMenu() {
               id="btn-logout"
               className="w-full px-4 py-2 text-left text-sm text-destructive transition-colors hover:bg-muted"
             >
-              Keluar
+              Logout
             </button>
           </div>
         </>
@@ -188,11 +188,11 @@ export function AppShell({
           <span className="section-label shrink-0">Menu</span>
           <div className="flex gap-3 text-sm">
             <a href="/" className="text-muted-foreground hover:text-foreground">Dashboard</a>
-            <a href="/submit" className="text-muted-foreground hover:text-foreground">Laporan Baru</a>
-            <a href="/reports" className="text-muted-foreground hover:text-foreground">Laporan</a>
-            <a href="/questions" className="text-muted-foreground hover:text-foreground">Pertanyaan</a>
-            <a href="/master-data" className="text-muted-foreground hover:text-foreground">Data Master</a>
-            <a href="/users" className="text-muted-foreground hover:text-foreground">Pengguna</a>
+            <a href="/submit" className="text-muted-foreground hover:text-foreground">New Report</a>
+            <a href="/reports" className="text-muted-foreground hover:text-foreground">Reports</a>
+            <a href="/questions" className="text-muted-foreground hover:text-foreground">Questions</a>
+            <a href="/master-data" className="text-muted-foreground hover:text-foreground">Master Data</a>
+            <a href="/users" className="text-muted-foreground hover:text-foreground">Users</a>
           </div>
         </div>
 

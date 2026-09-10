@@ -727,6 +727,9 @@ function ShiftsTab() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
 
 /* ─── Page ───────────────────────────────────────────────────── */
 function MasterDataPage() {
@@ -735,15 +738,15 @@ function MasterDataPage() {
 
   return (
     <AppShell
-      title="Data Master"
-      description="Referensi lokasi, area, dan shift yang digunakan di seluruh formulir"
+      title="Master Data"
+      description="Location, area, and shift references used across all forms"
     >
       {/* Title Panel */}
       <div className="panel mb-5 overflow-hidden">
         <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
           <div className="flex items-center gap-2 font-display font-bold text-foreground">
             <LayoutDashboard className="h-5 w-5 text-primary" />
-            <span>Data Master &mdash; Referensi Sistem</span>
+            <span>Master Data &mdash; System References</span>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">

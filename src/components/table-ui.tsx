@@ -8,7 +8,7 @@ import { Search, X, ChevronLeft, ChevronRight } from "lucide-react";
 export function TableToolbar({
   searchValue,
   onSearchChange,
-  searchPlaceholder = "Cari…",
+  searchPlaceholder = "Search…",
   filters,
   primaryAction,
 }: {
@@ -35,7 +35,7 @@ export function TableToolbar({
           <button
             onClick={() => onSearchChange("")}
             className="text-muted-foreground hover:text-foreground"
-            aria-label="Hapus pencarian"
+            aria-label="Clear search"
           >
             <X className="h-3.5 w-3.5" />
           </button>

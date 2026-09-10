@@ -29,13 +29,13 @@ import {
 export const Route = createFileRoute("/questions")({
   head: () => ({
     meta: [
-      { title: "Pertanyaan | RDL Report Monitoring System" },
+      { title: "Questions | RDL Report Monitoring System" },
       {
         name: "description",
         content:
-          "Kelola daftar pertanyaan untuk setiap formulir laporan. Tambah, edit, susun urutan, dan atur visibilitas pertanyaan.",
+          "Manage question lists for each report form. Add, edit, reorder, and set question visibility.",
       },
-      { property: "og:title", content: "Pertanyaan | RDL Report Monitoring System" },
+      { property: "og:title", content: "Questions | RDL Report Monitoring System" },
     ],
   }),
   component: QuestionsPage,

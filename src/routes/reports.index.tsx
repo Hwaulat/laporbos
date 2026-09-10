@@ -188,7 +188,7 @@ function ReportsPage() {
             params={{ reportId: r.id }}
             id={`btn-view-${r.id}`}
             className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-transparent text-muted-foreground transition-colors hover:bg-muted hover:text-primary"
-            title="Lihat detail"
+            title="View details"
           >
             <Eye className="h-4 w-4" />
           </Link>
@@ -225,8 +225,8 @@ function ReportsPage() {
       );
     }
     if (formType === "qrp") {
-      const mesin = r.answers?.find(a => a.prompt.toLowerCase().includes("mesin"))?.value || "Mesin Press / Perakitan";
-      const resiko = r.answers?.find(a => a.prompt.toLowerCase().includes("risiko"))?.value || "Risiko Sedang";
+      const mesin = r.answers?.find(a => a.prompt.toLowerCase().includes("mesin") || a.prompt.toLowerCase().includes("machine"))?.value || "Press / Assembly Machine";
+      const resiko = r.answers?.find(a => a.prompt.toLowerCase().includes("risiko") || a.prompt.toLowerCase().includes("risk"))?.value || "Medium Risk";
       return (
         <tr key={r.id} className="transition-colors hover:bg-muted/30">
           {actionCol}
@@ -411,7 +411,7 @@ function ReportsPage() {
                     colSpan={8}
                     className="px-4 py-14 text-center text-sm text-muted-foreground"
                   >
-                    Tidak ada laporan yang sesuai filter
+                    No reports match the current filters
                   </td>
                 </tr>
               ) : (
