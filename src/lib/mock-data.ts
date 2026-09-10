@@ -21,7 +21,7 @@ export const formName = (id: FormTypeId) =>
   formTypes.find((f) => f.id === id)?.name ?? id;
 
 export type Location = { id: string; name: string; code: string; active: boolean };
-export type Area = { id: string; name: string; locationId: string; active: boolean };
+export type Area = { id: string; name: string; locationId?: string; locationIds?: string[]; active: boolean };
 export type Shift = { id: string; name: string; start: string; end: string; active: boolean };
 
 export const locations: Location[] = [
@@ -32,13 +32,13 @@ export const locations: Location[] = [
 ];
 
 export const areas: Area[] = [
-  { id: "ar-1", name: "Assembly Line A", locationId: "loc-1", active: true },
-  { id: "ar-2", name: "Assembly Line B", locationId: "loc-1", active: true },
-  { id: "ar-3", name: "Utility & Boiler", locationId: "loc-1", active: true },
-  { id: "ar-4", name: "Press Shop", locationId: "loc-2", active: true },
-  { id: "ar-5", name: "Painting", locationId: "loc-2", active: true },
-  { id: "ar-6", name: "Loading Dock", locationId: "loc-3", active: true },
-  { id: "ar-7", name: "Cold Storage", locationId: "loc-3", active: true },
+  { id: "ar-1", name: "Assembly Line A", locationIds: ["loc-1"], active: true },
+  { id: "ar-2", name: "Assembly Line B", locationIds: ["loc-1"], active: true },
+  { id: "ar-3", name: "Utility & Boiler", locationIds: ["loc-1"], active: true },
+  { id: "ar-4", name: "Press Shop", locationIds: ["loc-2"], active: true },
+  { id: "ar-5", name: "Painting", locationIds: ["loc-2"], active: true },
+  { id: "ar-6", name: "Loading Dock", locationIds: ["loc-3"], active: true },
+  { id: "ar-7", name: "Cold Storage", locationIds: ["loc-3"], active: true },
 ];
 
 export const shifts: Shift[] = [
@@ -284,21 +284,25 @@ export const reports: Report[] = Array.from({ length: 48 }).map((_, i) => {
 
 export type User = {
   id: string;
+  nik: string;
   name: string;
   email: string;
   role: Role;
+  team: string;
+  entity: string;
+  allocation: string;
   locationId: string;
   active: boolean;
 };
 
 export const users: User[] = [
-  { id: "u-1", name: "Agung Gumelar", email: "agung@rdl.co.id", role: "Admin", locationId: "loc-1", active: true },
-  { id: "u-2", name: "Hendra Wijaya", email: "hendra@rdl.co.id", role: "Supervisor", locationId: "loc-1", active: true },
-  { id: "u-3", name: "Maria Kurnia", email: "maria@rdl.co.id", role: "Supervisor", locationId: "loc-2", active: true },
-  { id: "u-4", name: "Rizky Ananda", email: "rizky@rdl.co.id", role: "Technician", locationId: "loc-1", active: true },
-  { id: "u-5", name: "Budi Santoso", email: "budi@rdl.co.id", role: "Operator", locationId: "loc-1", active: true },
-  { id: "u-6", name: "Siti Rahayu", email: "siti@rdl.co.id", role: "Operator", locationId: "loc-2", active: true },
-  { id: "u-7", name: "Joko Widarto", email: "joko@rdl.co.id", role: "Operator", locationId: "loc-3", active: false },
+  { id: "u-1", nik: "1001", name: "Agung Gumelar", email: "agung@rdl.co.id", role: "Admin", team: "Mechanical", entity: "Manager", allocation: "Head Office", locationId: "loc-1", active: true },
+  { id: "u-2", nik: "1002", name: "Hendra Wijaya", email: "hendra@rdl.co.id", role: "Supervisor", team: "Electrical", entity: "Supervisor", allocation: "Plant Cikarang", locationId: "loc-1", active: true },
+  { id: "u-3", nik: "1003", name: "Maria Kurnia", email: "maria@rdl.co.id", role: "Supervisor", team: "Production", entity: "Supervisor", allocation: "Plant Karawang", locationId: "loc-2", active: true },
+  { id: "u-4", nik: "1004", name: "Rizky Ananda", email: "rizky@rdl.co.id", role: "Technician", team: "Mechanical", entity: "Staff", allocation: "Plant Cikarang", locationId: "loc-1", active: true },
+  { id: "u-5", nik: "1005", name: "Budi Santoso", email: "budi@rdl.co.id", role: "Operator", team: "Warehouse", entity: "Operator", allocation: "Plant Cikarang", locationId: "loc-1", active: true },
+  { id: "u-6", nik: "1006", name: "Siti Rahayu", email: "siti@rdl.co.id", role: "Operator", team: "Packaging", entity: "Operator", allocation: "Plant Karawang", locationId: "loc-2", active: true },
+  { id: "u-7", nik: "1007", name: "Joko Widarto", email: "joko@rdl.co.id", role: "Operator", team: "Warehouse", entity: "Operator", allocation: "Warehouse Marunda", locationId: "loc-3", active: false },
 ];
 
 export const locationName = (id: string) => locations.find((l) => l.id === id)?.name ?? "-";

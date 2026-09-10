@@ -1,7 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   LayoutGrid,
-  FilePlus2,
   Files,
   ListChecks,
   Layers,
@@ -25,7 +24,6 @@ const groups: { label: string; items: Item[] }[] = [
     label: "Core functions",
     items: [
       { to: "/", label: "Dashboard", icon: LayoutGrid },
-      { to: "/submit", label: "New Report", icon: FilePlus2 },
       { to: "/reports", label: "Reports", icon: Files, badge: openCount },
     ],
   },

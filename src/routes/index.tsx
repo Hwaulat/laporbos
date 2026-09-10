@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import {
   Bar,
   BarChart,
@@ -14,17 +14,25 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import {
+  LayoutDashboard,
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { AppShell } from "@/components/app-shell";
+import { Tabs } from "@/components/custom-tabs";
+import { getLocalTimeZone, today } from "@internationalized/date";
+import type { DateValue } from "react-aria-components";
+import { DateRangePicker } from "@/components/ui/calendar/date-picker-untitled/date-range-picker-untitled";
 import {
   areaName,
-  areas,
   formTypes,
   locationName,
-  locations,
   reports,
   shiftName,
-  shifts,
   type FormTypeId,
+  type ReportStatus,
 } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/")({
@@ -34,13 +42,9 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Monitor safety and quality reports across all sites with per-form dashboards, filters and Open/Closed tracking.",
+          "Monitor safety and quality reports across all sites with Open/Closed tracking.",
       },
       { property: "og:title", content: "Dashboard | RDL Report Monitoring System" },
-      {
-        property: "og:description",
-        content: "Unified safety reporting dashboard for Lapor Bos, near-miss, QRP and unsafe condition reports.",
-      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -59,7 +63,7 @@ const chartColors = [
 function Empty() {
   return (
     <div className="flex h-56 items-center justify-center text-sm text-muted-foreground">
-      No data for the selected filters
+      No data available
     </div>
   );
 }
@@ -73,29 +77,74 @@ function Panel({ title, children }: { title: string; children: React.ReactNode }
   );
 }
 
+function DashboardToolbar({
+  range,
+  setRange,
+  activeForm,
+  setActiveForm,
+}: {
+  range: { start: DateValue; end: DateValue } | null;
+  setRange: (r: { start: DateValue; end: DateValue } | null) => void;
+  activeForm: FormTypeId;
+  setActiveForm: (f: FormTypeId) => void;
+}) {
+  return (
+    <div className="panel mb-5 overflow-hidden">
+      {/* Top row — title + right controls */}
+      <div className="flex flex-wrap items-center gap-3 border-b border-border px-5 py-3">
+        {/* Left: icon + title */}
+        <div className="flex items-center gap-2 font-display font-bold text-foreground">
+          <LayoutDashboard className="h-5 w-5 text-primary" />
+          <span>Dashboard &mdash; Report Monitoring</span>
+        </div>
+
+        <div className="ml-auto flex flex-wrap items-center gap-4">
+          <Tabs
+            variant="primary"
+            value={activeForm}
+            onValueChange={(v) => setActiveForm(v as FormTypeId)}
+            items={formTypes.map((f) => ({
+              value: f.id,
+              label: f.name,
+            }))}
+          />
+          <DateRangePicker
+            value={range}
+            onChange={setRange}
+            showPresets={false}
+            showDateInputs={false}
+            onApply={() => console.log('apply range')}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 function Dashboard() {
-  const [formType, setFormType] = useState<FormTypeId>("lapor-bos-v2");
-  const [location, setLocation] = useState("all");
-  const [area, setArea] = useState("all");
-  const [shift, setShift] = useState("all");
-  const [status, setStatus] = useState("all");
+  const [activeForm, setActiveForm] = useState<FormTypeId>(formTypes[0].id);
+  
+  const currentDate = today(getLocalTimeZone());
+  const [range, setRange] = useState<{ start: DateValue; end: DateValue } | null>({
+    start: currentDate.subtract({ days: 6 }),
+    end: currentDate,
+  });
 
   const filtered = useMemo(
     () =>
-      reports.filter(
-        (r) =>
-          r.formType === formType &&
-          (location === "all" || r.locationId === location) &&
-          (area === "all" || r.areaId === area) &&
-          (shift === "all" || r.shiftId === shift) &&
-          (status === "all" || r.status === status),
-      ),
-    [formType, location, area, shift, status],
+      reports.filter((r) => {
+        const matchForm = r.formType === activeForm;
+        return matchForm;
+      }),
+    [activeForm, range]
   );
 
   const open = filtered.filter((r) => r.status === "Open").length;
   const closed = filtered.length - open;
-  const closureRate = filtered.length ? Math.round((closed / filtered.length) * 100) : 0;
+  const closureRate = filtered.length
+    ? Math.round((closed / filtered.length) * 100)
+    : 0;
 
   const overTime = useMemo(() => {
     const map = new Map<string, number>();
@@ -106,109 +155,64 @@ function Dashboard() {
     return [...map.entries()].sort().map(([date, total]) => ({ date, total }));
   }, [filtered]);
 
-  const byKey = (get: (id: string) => string, field: "locationId" | "areaId" | "shiftId") => {
+  const byKey = (
+    get: (id: string) => string,
+    field: "locationId" | "areaId" | "shiftId",
+  ) => {
     const map = new Map<string, number>();
-    filtered.forEach((r) => map.set(get(r[field]), (map.get(get(r[field])) ?? 0) + 1));
+    filtered.forEach((r) =>
+      map.set(get(r[field]), (map.get(get(r[field])) ?? 0) + 1),
+    );
     return [...map.entries()].map(([name, total]) => ({ name, total }));
   };
 
-  const areaOptions = location === "all" ? areas : areas.filter((a) => a.locationId === location);
+  const shift1 = filtered.filter((r) => r.shiftId === "sh-1").length;
+  const shift2 = filtered.filter((r) => r.shiftId === "sh-2").length;
+  const shift3 = filtered.filter((r) => r.shiftId === "sh-3").length;
 
   const stats = [
-    { label: "Total submissions", value: filtered.length },
-    { label: "Open", value: open },
-    { label: "Closed", value: closed },
-    { label: "Closure rate", value: `${closureRate}%` },
+    { label: "Total Reports", value: filtered.length },
+    ...(activeForm === "unsafe-condition"
+      ? [
+          { label: "Open", value: open },
+          { label: "Closed", value: closed },
+          { label: "Closure Rate", value: `${closureRate}%` },
+        ]
+      : [
+          { label: "Shift 1 Reports", value: shift1 },
+          { label: "Shift 2 Reports", value: shift2 },
+          { label: "Shift 3 Reports", value: shift3 },
+        ]),
   ];
 
   return (
     <AppShell
       title="Dashboard"
-      description="Per-form visualisations with shared filters"
-      actions={
-        <>
-          <select
-            value={formType}
-            onChange={(e) => setFormType(e.target.value as FormTypeId)}
-            className="rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium"
-          >
-            {formTypes.map((f) => (
-              <option key={f.id} value={f.id}>
-                {f.name}
-              </option>
-            ))}
-          </select>
-          <select
-            value={location}
-            onChange={(e) => {
-              setLocation(e.target.value);
-              setArea("all");
-            }}
-            className="rounded-lg border border-border bg-card px-3 py-2 text-sm"
-          >
-            <option value="all">All locations</option>
-            {locations.map((l) => (
-              <option key={l.id} value={l.id}>
-                {l.name}
-              </option>
-            ))}
-          </select>
-          <select
-            value={area}
-            onChange={(e) => setArea(e.target.value)}
-            disabled={areaOptions.length === 0}
-            className="rounded-lg border border-border bg-card px-3 py-2 text-sm"
-          >
-            <option value="all">All areas</option>
-            {areaOptions.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.name}
-              </option>
-            ))}
-          </select>
-          <select
-            value={shift}
-            onChange={(e) => setShift(e.target.value)}
-            className="rounded-lg border border-border bg-card px-3 py-2 text-sm"
-          >
-            <option value="all">All shifts</option>
-            {shifts.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
-            ))}
-          </select>
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            className="rounded-lg border border-border bg-card px-3 py-2 text-sm"
-          >
-            <option value="all">All status</option>
-            <option value="Open">Open</option>
-            <option value="Closed">Closed</option>
-          </select>
-          <Link
-            to="/reports"
-            search={{ formType }}
-            className="ml-auto rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground"
-          >
-            Open report list
-          </Link>
-        </>
-      }
+      description="Safety and quality reports overview across all sites"
     >
+      <DashboardToolbar
+        range={range}
+        setRange={setRange}
+        activeForm={activeForm}
+        setActiveForm={setActiveForm}
+      />
+
+      {/* Summary cards */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map((s) => (
           <div key={s.label} className="panel p-5">
-            <div className="text-xs uppercase tracking-wide text-muted-foreground">{s.label}</div>
+            <div className="text-xs uppercase tracking-wide text-muted-foreground">
+              {s.label}
+            </div>
             <div className="mt-2 font-display text-3xl font-bold">{s.value}</div>
           </div>
         ))}
       </div>
 
+      {/* Charts row 1 */}
       <div className="mt-4 grid gap-4 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <Panel title="Submissions over time">
+        <div className={activeForm === "unsafe-condition" ? "lg:col-span-2" : "lg:col-span-3"}>
+          <Panel title="Reports Over Time">
             {overTime.length === 0 ? (
               <Empty />
             ) : (
@@ -218,44 +222,52 @@ function Dashboard() {
                   <XAxis dataKey="date" fontSize={12} stroke="var(--color-muted-foreground)" />
                   <YAxis allowDecimals={false} fontSize={12} stroke="var(--color-muted-foreground)" />
                   <Tooltip />
-                  <Line type="monotone" dataKey="total" stroke="var(--color-chart-1)" strokeWidth={2} />
+                  <Line
+                    type="monotone"
+                    dataKey="total"
+                    stroke="var(--color-chart-1)"
+                    strokeWidth={2}
+                  />
                 </LineChart>
               </ResponsiveContainer>
             )}
           </Panel>
         </div>
-        <Panel title="Open vs Closed">
-          {filtered.length === 0 ? (
-            <Empty />
-          ) : (
-            <ResponsiveContainer width="100%" height={240}>
-              <PieChart>
-                <Pie
-                  data={[
-                    { name: "Open", value: open },
-                    { name: "Closed", value: closed },
-                  ]}
-                  dataKey="value"
-                  nameKey="name"
-                  innerRadius={55}
-                  outerRadius={85}
-                  label
-                >
-                  <Cell fill="var(--color-chart-2)" />
-                  <Cell fill="var(--color-chart-3)" />
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          )}
-        </Panel>
+        {activeForm === "unsafe-condition" && (
+          <Panel title="Open vs Closed">
+            {filtered.length === 0 ? (
+              <Empty />
+            ) : (
+              <ResponsiveContainer width="100%" height={240}>
+                <PieChart>
+                  <Pie
+                    data={[
+                      { name: "Open", value: open },
+                      { name: "Closed", value: closed },
+                    ]}
+                    dataKey="value"
+                    nameKey="name"
+                    innerRadius={55}
+                    outerRadius={85}
+                    label
+                  >
+                    <Cell fill="var(--color-chart-2)" />
+                    <Cell fill="var(--color-chart-3)" />
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
+          </Panel>
+        )}
       </div>
 
+      {/* Charts row 2 */}
       <div className="mt-4 grid gap-4 lg:grid-cols-3">
         {[
-          { title: "By location", data: byKey(locationName, "locationId") },
-          { title: "By area", data: byKey(areaName, "areaId") },
-          { title: "By shift", data: byKey(shiftName, "shiftId") },
+          { title: "Per Lokasi", data: byKey(locationName, "locationId") },
+          { title: "Per Area", data: byKey(areaName, "areaId") },
+          { title: "Per Shift", data: byKey(shiftName, "shiftId") },
         ].map((c) => (
           <Panel key={c.title} title={c.title}>
             {c.data.length === 0 ? (

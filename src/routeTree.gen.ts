@@ -10,7 +10,10 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as MasterDataRouteImport } from './routes/master-data'
+import { Route as QuestionsRouteImport } from './routes/questions'
 import { Route as SubmitRouteImport } from './routes/submit'
+import { Route as UsersRouteImport } from './routes/users'
 import { Route as ReportsIndexRouteImport } from './routes/reports.index'
 import { Route as ReportsReportIdRouteImport } from './routes/reports.$reportId'
 
@@ -19,9 +22,24 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MasterDataRoute = MasterDataRouteImport.update({
+  id: '/master-data',
+  path: '/master-data',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QuestionsRoute = QuestionsRouteImport.update({
+  id: '/questions',
+  path: '/questions',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SubmitRoute = SubmitRouteImport.update({
   id: '/submit',
   path: '/submit',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UsersRoute = UsersRouteImport.update({
+  id: '/users',
+  path: '/users',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReportsIndexRoute = ReportsIndexRouteImport.update({
@@ -37,34 +55,68 @@ const ReportsReportIdRoute = ReportsReportIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/master-data': typeof MasterDataRoute
+  '/questions': typeof QuestionsRoute
   '/submit': typeof SubmitRoute
+  '/users': typeof UsersRoute
   '/reports/$reportId': typeof ReportsReportIdRoute
   '/reports/': typeof ReportsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/master-data': typeof MasterDataRoute
+  '/questions': typeof QuestionsRoute
   '/submit': typeof SubmitRoute
+  '/users': typeof UsersRoute
   '/reports/$reportId': typeof ReportsReportIdRoute
   '/reports': typeof ReportsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/master-data': typeof MasterDataRoute
+  '/questions': typeof QuestionsRoute
   '/submit': typeof SubmitRoute
+  '/users': typeof UsersRoute
   '/reports/$reportId': typeof ReportsReportIdRoute
   '/reports/': typeof ReportsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/submit' | '/reports/$reportId' | '/reports/'
+  fullPaths:
+    | '/'
+    | '/master-data'
+    | '/questions'
+    | '/submit'
+    | '/users'
+    | '/reports/$reportId'
+    | '/reports/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/submit' | '/reports/$reportId' | '/reports'
-  id: '__root__' | '/' | '/submit' | '/reports/$reportId' | '/reports/'
+  to:
+    | '/'
+    | '/master-data'
+    | '/questions'
+    | '/submit'
+    | '/users'
+    | '/reports/$reportId'
+    | '/reports'
+  id:
+    | '__root__'
+    | '/'
+    | '/master-data'
+    | '/questions'
+    | '/submit'
+    | '/users'
+    | '/reports/$reportId'
+    | '/reports/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  MasterDataRoute: typeof MasterDataRoute
+  QuestionsRoute: typeof QuestionsRoute
   SubmitRoute: typeof SubmitRoute
+  UsersRoute: typeof UsersRoute
   ReportsReportIdRoute: typeof ReportsReportIdRoute
   ReportsIndexRoute: typeof ReportsIndexRoute
 }
@@ -78,11 +130,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/master-data': {
+      id: '/master-data'
+      path: '/master-data'
+      fullPath: '/master-data'
+      preLoaderRoute: typeof MasterDataRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/questions': {
+      id: '/questions'
+      path: '/questions'
+      fullPath: '/questions'
+      preLoaderRoute: typeof QuestionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/submit': {
       id: '/submit'
       path: '/submit'
       fullPath: '/submit'
       preLoaderRoute: typeof SubmitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/users': {
+      id: '/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof UsersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reports/': {
@@ -104,7 +177,10 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  MasterDataRoute: MasterDataRoute,
+  QuestionsRoute: QuestionsRoute,
   SubmitRoute: SubmitRoute,
+  UsersRoute: UsersRoute,
   ReportsReportIdRoute: ReportsReportIdRoute,
   ReportsIndexRoute: ReportsIndexRoute,
 }
