@@ -131,9 +131,9 @@ function QuestionsPage() {
     const options =
       optionsText?.trim()
         ? optionsText
-            .split(",")
-            .map((s) => s.trim())
-            .filter(Boolean)
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean)
         : undefined;
     if (!q.prompt?.trim()) return;
     if (modal.mode === "add") {
@@ -149,22 +149,7 @@ function QuestionsPage() {
         responses: 0,
       };
       setQs((prev) => [...prev, newQ]);
-    } else {
-      setQs((prev) =>
-        prev.map((item) =>
-          item.id === q.id
-            ? {
-                ...item,
-                prompt: q.prompt!,
-                inputType: q.inputType ?? item.inputType,
-                options,
-                required: q.required ?? item.required,
-                visible: q.visible ?? item.visible,
-              }
-            : item,
-        ),
-      );
-    }
+    };
     setModal({ open: false, mode: "add", question: {} });
   }
 
@@ -231,35 +216,35 @@ function QuestionsPage() {
         <div className="p-4 pb-3 sm:p-5 sm:pb-4 border-b border-border [&>div]:!mb-0">
           {/* Toolbar */}
           <TableToolbar
-        searchValue={search}
-        onSearchChange={(v) => { setSearch(v); setPage(1); }}
-        searchPlaceholder="Search questions…"
-        filters={
-          <FilterSelect
-            id="filter-input-type"
-            value={typeFilter}
-            onChange={(v) => { setTypeFilter(v); setPage(1); }}
-          >
-            <option value="all">All Type</option>
-            {(Object.keys(INPUT_TYPE_LABELS) as InputType[]).map((t) => (
-              <option key={t} value={t}>
-                {INPUT_TYPE_LABELS[t]}
-              </option>
-            ))}
-          </FilterSelect>
-        }
-        primaryAction={
-          <button
-            id="btn-add-question"
-            onClick={openAdd}
-            className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
-          >
-            <Plus className="h-4 w-4" />
-            Add Question
-          </button>
-        }
-      />
-      </div>
+            searchValue={search}
+            onSearchChange={(v) => { setSearch(v); setPage(1); }}
+            searchPlaceholder="Search questions…"
+            filters={
+              <FilterSelect
+                id="filter-input-type"
+                value={typeFilter}
+                onChange={(v) => { setTypeFilter(v); setPage(1); }}
+              >
+                <option value="all">All Type</option>
+                {(Object.keys(INPUT_TYPE_LABELS) as InputType[]).map((t) => (
+                  <option key={t} value={t}>
+                    {INPUT_TYPE_LABELS[t]}
+                  </option>
+                ))}
+              </FilterSelect>
+            }
+            primaryAction={
+              <button
+                id="btn-add-question"
+                onClick={openAdd}
+                className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
+              >
+                <Plus className="h-4 w-4" />
+                Add Question
+              </button>
+            }
+          />
+        </div>
 
         {formQs.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-3 py-20 text-center">
@@ -283,7 +268,6 @@ function QuestionsPage() {
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">Type</th>
                     <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-muted-foreground">Required</th>
                     <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-muted-foreground">Visible</th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-muted-foreground">Responses</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -321,7 +305,6 @@ function QuestionsPage() {
                             {q.visible ? <Eye className="h-4 w-4 text-primary" /> : <EyeOff className="h-4 w-4 text-muted-foreground" />}
                           </button>
                         </td>
-                        <td className="px-4 py-3 text-right font-display font-semibold tabular-nums text-muted-foreground">{q.responses.toLocaleString("id-ID")}</td>
                       </tr>
                     );
                   })}

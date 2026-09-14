@@ -52,7 +52,7 @@ export type Question = {
   formType: FormTypeId;
   prompt: string;
   inputType: InputType;
-  options?: string[];
+  options?: string[] | undefined;
   order: number;
   required: boolean;
   visible: boolean;
