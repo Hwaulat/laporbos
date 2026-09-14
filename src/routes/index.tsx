@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { Tabs } from "@/components/custom-tabs";
+import { TableToolbar, Pagination } from "@/components/table-ui";
 import { getLocalTimeZone, today } from "@internationalized/date";
 import type { DateValue } from "react-aria-components";
 import { DateRangePicker } from "@/components/ui/calendar/date-picker-untitled/date-range-picker-untitled";
@@ -90,13 +91,25 @@ const topBehaviorsData = [
   { code: "GMLU1", title: "Ignoring Warning Signs", count: 1, percentage: 10 },
 ];
 
-function TopUnsafeBehaviors() {
+function TopListWithProgress({
+  title,
+  description,
+  data,
+  hideAreaFilter = false,
+  colorTheme = "red",
+}: {
+  title: string;
+  description: string;
+  data: { code: string; title: string; count: number; percentage: number }[];
+  hideAreaFilter?: boolean;
+  colorTheme?: "red" | "blue";
+}) {
   return (
     <div className="panel h-full p-6">
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div>
-          <h3 className="text-lg font-bold text-slate-800">Top 10 Unsafe Behaviors</h3>
-          <p className="mt-1 text-sm text-slate-500">Specific observation codes recorded by supervisors at the plant.</p>
+          <h3 className="text-lg font-bold text-slate-800">{title}</h3>
+          <p className="mt-1 text-sm text-slate-500">{description}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <select className="rounded-md border border-input bg-background px-2 py-1 text-xs text-foreground shadow-sm focus:outline-none focus:ring-1 focus:ring-primary">
@@ -110,20 +123,22 @@ function TopUnsafeBehaviors() {
             <option>Plant Cikarang</option>
             <option>Plant Karawang</option>
           </select>
-          <select className="rounded-md border border-input bg-background px-2 py-1 text-xs text-foreground shadow-sm focus:outline-none focus:ring-1 focus:ring-primary">
-            <option>All Areas</option>
-            <option>Assembly Line A</option>
-            <option>Press Shop</option>
-          </select>
+          {!hideAreaFilter && (
+            <select className="rounded-md border border-input bg-background px-2 py-1 text-xs text-foreground shadow-sm focus:outline-none focus:ring-1 focus:ring-primary">
+              <option>All Areas</option>
+              <option>Assembly Line A</option>
+              <option>Press Shop</option>
+            </select>
+          )}
         </div>
       </div>
-      
+
       <div className="mt-6 flex flex-col space-y-4">
-        {topBehaviorsData.map((item) => (
+        {data.map((item) => (
           <div key={item.code}>
             <div className="mb-1.5 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <span className="rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-bold text-red-700">
+                <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${colorTheme === "blue" ? "bg-blue-100 text-blue-700" : "bg-red-100 text-red-700"}`}>
                   {item.code}
                 </span>
                 <span className="text-sm font-semibold text-slate-800">{item.title}</span>
@@ -132,7 +147,7 @@ function TopUnsafeBehaviors() {
             </div>
             <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
               <div
-                className="h-full rounded-full bg-red-700"
+                className={`h-full rounded-full ${colorTheme === "blue" ? "bg-blue-700" : "bg-red-700"}`}
                 style={{ width: `${item.percentage}%` }}
               />
             </div>
@@ -140,6 +155,16 @@ function TopUnsafeBehaviors() {
         ))}
       </div>
     </div>
+  );
+}
+
+function TopUnsafeBehaviors() {
+  return (
+    <TopListWithProgress
+      title="Top 10 most frequently reported items"
+      description="Specific observation codes recorded by supervisors at the plant."
+      data={topBehaviorsData}
+    />
   );
 }
 
@@ -192,6 +217,233 @@ function AreaObservationList() {
   );
 }
 
+const nearmissUsersData = [
+  { name: "Hasan - Maintenance", total: 12 },
+  { name: "Andre - Production", total: 8 },
+  { name: "Siti - Logistics", total: 5 },
+  { name: "Budi - Utility", total: 4 },
+];
+
+const nearmissRecentEventsData = [
+  { id: 1, date: "2026-09-14", shift: "Shift 1", location: "Plant Cikarang", user: "Hasan - Maintenance", desc: "Slipped on oil spill near conveyor" },
+  { id: 2, date: "2026-09-13", shift: "Shift 2", location: "Plant Karawang", user: "Andre - Production", desc: "Almost hit by forklift at crossing" },
+  { id: 3, date: "2026-09-12", shift: "Shift 3", location: "Plant Cikarang", user: "Siti - Logistics", desc: "Pallet fell from racking" },
+  { id: 4, date: "2026-09-10", shift: "Shift 1", location: "Plant Cikarang", user: "Budi - Utility", desc: "Burn hazard from uninsulated pipe" },
+  { id: 5, date: "2026-09-08", shift: "Shift 2", location: "Plant Karawang", user: "Hasan - Maintenance", desc: "Tripped over loose cables" },
+  { id: 6, date: "2026-09-05", shift: "Shift 1", location: "Plant Cikarang", user: "Andre - Production", desc: "Caught hand in moving parts" },
+  { id: 7, date: "2026-09-04", shift: "Shift 3", location: "Plant Karawang", user: "Siti - Logistics", desc: "Stacked boxes unstable" },
+  { id: 8, date: "2026-09-02", shift: "Shift 1", location: "Plant Cikarang", user: "Hasan - Maintenance", desc: "Sparks from faulty wiring" },
+  { id: 9, date: "2026-09-01", shift: "Shift 2", location: "Plant Karawang", user: "Andre - Production", desc: "Dropped tool from height" },
+];
+
+function NearmissTopUsersChart() {
+  const [shiftFilter, setShiftFilter] = useState("all");
+  const chartColors = ["var(--color-chart-1)", "var(--color-chart-2)", "var(--color-chart-3)", "var(--color-chart-4)"];
+
+  return (
+    <div className="panel p-5">
+      <div className="mb-4 flex items-center justify-between">
+        <h3 className="text-sm font-semibold">Top Users (Near Miss)</h3>
+        <select
+          value={shiftFilter}
+          onChange={(e) => setShiftFilter(e.target.value)}
+          className="rounded-md border border-input bg-background px-2 py-1 text-xs shadow-sm focus:outline-none focus:ring-1 focus:ring-primary"
+        >
+          <option value="all">All Shifts</option>
+          <option value="1">Shift 1</option>
+          <option value="2">Shift 2</option>
+          <option value="3">Shift 3</option>
+        </select>
+      </div>
+      <ResponsiveContainer width="100%" height={220}>
+        <PieChart>
+          <Pie
+            data={nearmissUsersData}
+            dataKey="total"
+            nameKey="name"
+            innerRadius={45}
+            outerRadius={75}
+            label
+          >
+            {nearmissUsersData.map((_, i) => (
+              <Cell key={i} fill={chartColors[i % chartColors.length]} />
+            ))}
+          </Pie>
+          <Tooltip />
+        </PieChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+function NearmissEventsTable() {
+  const [searchValue, setSearchValue] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
+
+  const filtered = nearmissRecentEventsData.filter(d =>
+    d.desc.toLowerCase().includes(searchValue.toLowerCase()) ||
+    d.user.toLowerCase().includes(searchValue.toLowerCase())
+  );
+  const paginated = filtered.slice((page - 1) * pageSize, page * pageSize);
+
+  return (
+    <div className="mt-4 p-6 rounded-xl border border-border bg-white shadow-sm">
+      <h3 className="mb-4 text-lg font-bold text-slate-800">List of recent events</h3>
+      <TableToolbar
+        searchValue={searchValue}
+        onSearchChange={setSearchValue}
+        searchPlaceholder="Search events or users..."
+        filters={
+          <div className="flex gap-2">
+            {/* <select className="rounded-lg border border-border bg-card px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-ring">
+              <option>All Dates</option>
+              <option>Last 7 Days</option>
+              <option>Last 30 Days</option>
+            </select> */}
+            <input type="date" className="rounded-lg border border-border bg-card px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+          </div>
+        }
+      />
+      <div className="overflow-x-auto rounded-t-xl border border-border bg-card">
+        <table className="w-full text-left text-sm">
+          <thead className="border-b border-border bg-muted/50">
+            <tr>
+              <th className="px-4 py-3 font-semibold text-muted-foreground">Date</th>
+              <th className="px-4 py-3 font-semibold text-muted-foreground">Shift</th>
+              <th className="px-4 py-3 font-semibold text-muted-foreground">Location</th>
+              <th className="px-4 py-3 font-semibold text-muted-foreground">User Name</th>
+              <th className="px-4 py-3 font-semibold text-muted-foreground">Description</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {paginated.length > 0 ? (
+              paginated.map((item) => (
+                <tr key={item.id} className="hover:bg-muted/50 transition-colors">
+                  <td className="px-4 py-3 whitespace-nowrap">{item.date}</td>
+                  <td className="px-4 py-3 whitespace-nowrap">{item.shift}</td>
+                  <td className="px-4 py-3 whitespace-nowrap">{item.location}</td>
+                  <td className="px-4 py-3 whitespace-nowrap font-medium">{item.user}</td>
+                  <td className="px-4 py-3">{item.desc}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={5} className="p-8 text-center text-muted-foreground">No events found.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+      <Pagination
+        total={filtered.length}
+        page={page}
+        pageSize={pageSize}
+        onPageChange={setPage}
+        onPageSizeChange={setPageSize}
+      />
+    </div>
+  );
+}
+
+const unsafeRecentEventsData = [
+  { id: 1, date: "2026-09-14", shift: "Shift 1", location: "Plant Cikarang", desc: "Oil spill near conveyor belt" },
+  { id: 2, date: "2026-09-13", shift: "Shift 2", location: "Plant Karawang", desc: "Exposed wiring on control panel" },
+  { id: 3, date: "2026-09-12", shift: "Shift 3", location: "Plant Cikarang", desc: "Pallet stacked too high and leaning" },
+  { id: 4, date: "2026-09-10", shift: "Shift 1", location: "Plant Cikarang", desc: "Emergency exit blocked by boxes" },
+  { id: 5, date: "2026-09-08", shift: "Shift 2", location: "Plant Karawang", desc: "Missing safety guard on grinder" },
+  { id: 6, date: "2026-09-05", shift: "Shift 1", location: "Plant Cikarang", desc: "Water leak causing slipping hazard" },
+  { id: 7, date: "2026-09-04", shift: "Shift 3", location: "Plant Karawang", desc: "Improper storage of flammable liquids" },
+];
+
+function UnsafeEventsTable() {
+  const [searchValue, setSearchValue] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
+
+  const filtered = unsafeRecentEventsData.filter(d =>
+    d.desc.toLowerCase().includes(searchValue.toLowerCase())
+  );
+  const paginated = filtered.slice((page - 1) * pageSize, page * pageSize);
+
+  return (
+    <div className="mt-4 p-6 rounded-xl border border-border bg-white shadow-sm">
+      <h3 className="mb-4 text-lg font-bold text-slate-800">List of recent unsafe</h3>
+      <TableToolbar
+        searchValue={searchValue}
+        onSearchChange={setSearchValue}
+        searchPlaceholder="Search events..."
+        filters={
+          <div className="flex gap-2">
+            <input type="date" className="rounded-lg border border-border bg-card px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+          </div>
+        }
+      />
+      <div className="overflow-x-auto rounded-t-xl border border-border bg-card">
+        <table className="w-full text-left text-sm">
+          <thead className="border-b border-border bg-muted/50">
+            <tr>
+              <th className="px-4 py-3 font-semibold text-muted-foreground">Tanggal Temuan</th>
+              <th className="px-4 py-3 font-semibold text-muted-foreground">Shift</th>
+              <th className="px-4 py-3 font-semibold text-muted-foreground">Location</th>
+              <th className="px-4 py-3 font-semibold text-muted-foreground">Description</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {paginated.length > 0 ? (
+              paginated.map((item) => (
+                <tr key={item.id} className="hover:bg-muted/50 transition-colors">
+                  <td className="px-4 py-3 whitespace-nowrap">{item.date}</td>
+                  <td className="px-4 py-3 whitespace-nowrap">{item.shift}</td>
+                  <td className="px-4 py-3 whitespace-nowrap">{item.location}</td>
+                  <td className="px-4 py-3">{item.desc}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={4} className="p-8 text-center text-muted-foreground">No events found.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+      <Pagination
+        total={filtered.length}
+        page={page}
+        pageSize={pageSize}
+        onPageChange={setPage}
+        onPageSizeChange={setPageSize}
+      />
+    </div>
+  );
+}
+
+const qrpJobsData = [
+  { code: "JOB01", title: "Preventive Maintenance", count: 42, percentage: 100 },
+  { code: "JOB02", title: "Machine Calibration", count: 35, percentage: 83 },
+  { code: "JOB03", title: "Troubleshooting", count: 28, percentage: 66 },
+  { code: "JOB04", title: "Part Replacement", count: 22, percentage: 52 },
+  { code: "JOB05", title: "Quality Inspection", count: 18, percentage: 42 },
+  { code: "JOB06", title: "Cleaning & Sanitation", count: 15, percentage: 35 },
+  { code: "JOB07", title: "Setup & Changeover", count: 12, percentage: 28 },
+  { code: "JOB08", title: "Lubrication Route", count: 10, percentage: 23 },
+  { code: "JOB09", title: "Safety Audit", count: 8, percentage: 19 },
+  { code: "JOB10", title: "Emergency Repair", count: 5, percentage: 11 },
+];
+
+const qrpMachinesData = [
+  { code: "MAC01", title: "Press Machine Alpha", count: 38, percentage: 100 },
+  { code: "MAC02", title: "Conveyor Line 1", count: 32, percentage: 84 },
+  { code: "MAC03", title: "Packaging Robot B", count: 25, percentage: 65 },
+  { code: "MAC04", title: "Oven Zone 3", count: 21, percentage: 55 },
+  { code: "MAC05", title: "Mixing Tank X", count: 17, percentage: 44 },
+  { code: "MAC06", title: "Cooling Tower A", count: 14, percentage: 36 },
+  { code: "MAC07", title: "Palletizer Unit 2", count: 11, percentage: 28 },
+  { code: "MAC08", title: "Grinding Mill C", count: 9, percentage: 23 },
+  { code: "MAC09", title: "Air Compressor 1", count: 7, percentage: 18 },
+  { code: "MAC10", title: "Labeling Machine", count: 4, percentage: 10 },
+];
+
 function DashboardToolbar({
   range,
   setRange,
@@ -239,7 +491,7 @@ function DashboardToolbar({
 
 function Dashboard() {
   const [activeForm, setActiveForm] = useState<FormTypeId>(formTypes[0].id);
-  
+
   const currentDate = today(getLocalTimeZone());
   const [range, setRange] = useState<{ start: DateValue; end: DateValue } | null>({
     start: currentDate.subtract({ days: 6 }),
@@ -315,15 +567,15 @@ function Dashboard() {
     { label: "Total Reports", value: filtered.length },
     ...(activeForm === "unsafe-condition"
       ? [
-          { label: "Open", value: open },
-          { label: "Closed", value: closed },
-          { label: "Closure Rate", value: `${closureRate}%` },
-        ]
+        { label: "Open", value: open },
+        { label: "Closed", value: closed },
+        { label: "Closure Rate", value: `${closureRate}%` },
+      ]
       : [
-          { label: "Shift 1 Reports", value: shift1 },
-          { label: "Shift 2 Reports", value: shift2 },
-          { label: "Shift 3 Reports", value: shift3 },
-        ]),
+        { label: "Shift 1 Reports", value: shift1 },
+        { label: "Shift 2 Reports", value: shift2 },
+        { label: "Shift 3 Reports", value: shift3 },
+      ]),
   ];
 
   return (
@@ -351,87 +603,94 @@ function Dashboard() {
       </div>
 
       {/* Charts row 1 */}
-      {(activeForm !== "lapor-bos-v2" && activeForm !== "lapor-bos-v3") && (
+      {(activeForm !== "lapor-bos-v2" && activeForm !== "lapor-bos-v3" && activeForm !== "qrp" && activeForm !== "near-miss") && (
         <div className="mt-4 grid gap-4 lg:grid-cols-3">
           <div className={activeForm === "unsafe-condition" ? "lg:col-span-2" : "lg:col-span-3"}>
-              <Panel title={activeForm === "unsafe-condition" ? "Report Unsafe" : "Reports Over Time"}>
-                {overTime.length === 0 ? (
-                  <Empty />
-                ) : (
-                  <ResponsiveContainer width="100%" height={240}>
-                    <LineChart data={overTime}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-                      <XAxis dataKey="date" fontSize={12} stroke="var(--color-muted-foreground)" />
-                      <YAxis allowDecimals={false} fontSize={12} stroke="var(--color-muted-foreground)" />
-                      <Tooltip />
-                      <Line
-                        type="monotone"
-                        dataKey="total"
-                        stroke="var(--color-chart-1)"
-                        strokeWidth={2}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                )}
-              </Panel>
-            </div>
-            {activeForm === "unsafe-condition" && (
-              <Panel title="Open vs Closed">
-                {filtered.length === 0 ? (
-                  <Empty />
-                ) : (
-                  <ResponsiveContainer width="100%" height={240}>
-                    <PieChart>
-                      <Pie
-                        data={[
-                          { name: "Open", value: open },
-                          { name: "Closed", value: closed },
-                        ]}
-                        dataKey="value"
-                        nameKey="name"
-                        innerRadius={55}
-                        outerRadius={85}
-                        label
-                      >
-                        <Cell fill="var(--color-chart-2)" />
-                        <Cell fill="var(--color-chart-3)" />
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
-                )}
-              </Panel>
-            )}
+            <Panel title={activeForm === "unsafe-condition" ? "Report Unsafe" : "Reports Over Time"}>
+              {overTime.length === 0 ? (
+                <Empty />
+              ) : (
+                <ResponsiveContainer width="100%" height={240}>
+                  <LineChart data={overTime}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+                    <XAxis dataKey="date" fontSize={12} stroke="var(--color-muted-foreground)" />
+                    <YAxis allowDecimals={false} fontSize={12} stroke="var(--color-muted-foreground)" />
+                    <Tooltip />
+                    <Line
+                      type="monotone"
+                      dataKey="total"
+                      stroke="var(--color-chart-1)"
+                      strokeWidth={2}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
+            </Panel>
+          </div>
+          {activeForm === "unsafe-condition" && (
+            <Panel title="Open vs Closed">
+              {filtered.length === 0 ? (
+                <Empty />
+              ) : (
+                <ResponsiveContainer width="100%" height={240}>
+                  <PieChart>
+                    <Pie
+                      data={[
+                        { name: "Open", value: open },
+                        { name: "Closed", value: closed },
+                      ]}
+                      dataKey="value"
+                      nameKey="name"
+                      innerRadius={55}
+                      outerRadius={85}
+                      label
+                    >
+                      <Cell fill="var(--color-chart-2)" />
+                      <Cell fill="var(--color-chart-3)" />
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              )}
+            </Panel>
+          )}
         </div>
       )}
 
       {/* Charts row 2 */}
-      <div className="mt-4 grid gap-4 lg:grid-cols-3">
+      <div className={`mt-4 grid gap-4 ${activeForm === "unsafe-condition" ? "lg:grid-cols-2" : "lg:grid-cols-3"}`}>
         {[
           { title: "By Location", data: byKey(locationName, "locationId") },
-          { title: "By Area", data: byKey(areaName, "areaId") },
+          ...(activeForm === "near-miss"
+            ? [{ title: "Top Users (Near Miss)", data: [], custom: <NearmissTopUsersChart /> }]
+            : activeForm === "unsafe-condition"
+            ? []
+            : [{ title: "By Area", data: byKey(areaName, "areaId") }]),
           { title: "By Shift", data: byKey(shiftName, "shiftId") },
-        ].map((c) => (
-          <Panel key={c.title} title={c.title}>
-            {c.data.length === 0 ? (
-              <Empty />
-            ) : (
-              <ResponsiveContainer width="100%" height={220}>
-                <BarChart data={c.data}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-                  <XAxis dataKey="name" fontSize={11} stroke="var(--color-muted-foreground)" />
-                  <YAxis allowDecimals={false} fontSize={11} stroke="var(--color-muted-foreground)" />
-                  <Tooltip />
-                  <Bar dataKey="total" radius={[6, 6, 0, 0]}>
-                    {c.data.map((_, i) => (
-                      <Cell key={i} fill={chartColors[i % chartColors.length]} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </Panel>
-        ))}
+        ].map((c) =>
+          c.custom ? (
+            <div key={c.title} className="h-full">{c.custom}</div>
+          ) : (
+            <Panel key={c.title} title={c.title}>
+              {c.data.length === 0 ? (
+                <Empty />
+              ) : (
+                <ResponsiveContainer width="100%" height={220}>
+                  <BarChart data={c.data}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+                    <XAxis dataKey="name" fontSize={11} stroke="var(--color-muted-foreground)" />
+                    <YAxis allowDecimals={false} fontSize={11} stroke="var(--color-muted-foreground)" />
+                    <Tooltip />
+                    <Bar dataKey="total" radius={[6, 6, 0, 0]}>
+                      {c.data.map((_, i) => (
+                        <Cell key={i} fill={chartColors[i % chartColors.length]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </Panel>
+          ))}
       </div>
 
       {/* Charts row 3 (Custom Lists for Lapor Bos) */}
@@ -444,6 +703,39 @@ function Dashboard() {
             <AreaObservationList />
           </div>
         </div>
+      )}
+
+      {/* Charts row 4 (Custom Lists for QRP) */}
+      {activeForm === "qrp" && (
+        <div className="mt-4 grid gap-4 lg:grid-cols-2">
+          <div className="lg:col-span-1">
+            <TopListWithProgress
+              title="Top 10 Frequent Jobs"
+              description="Most common types of work performed across all zones."
+              data={qrpJobsData}
+              hideAreaFilter={true}
+            />
+          </div>
+          <div className="lg:col-span-1">
+            <TopListWithProgress
+              title="Top 10 Frequent Machines"
+              description="Most frequently worked on machines."
+              data={qrpMachinesData}
+              hideAreaFilter={true}
+              colorTheme="blue"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Row 5: Table for Nearmiss Report */}
+      {activeForm === "near-miss" && (
+        <NearmissEventsTable />
+      )}
+
+      {/* Row 6: Table for Unsafe Condition */}
+      {activeForm === "unsafe-condition" && (
+        <UnsafeEventsTable />
       )}
     </AppShell>
   );
