@@ -46,7 +46,7 @@ function ReportsPage() {
   const { formType: initialForm } = Route.useSearch();
 
   const [q, setQ] = useState("");
-  const [formType, setFormType] = useState(initialForm ?? "all");
+  const [formType, setFormType] = useState(initialForm ?? formTypes[0].id);
   const [status, setStatus] = useState("all");
   const [location, setLocation] = useState("all");
   const [area, setArea] = useState("all");
@@ -309,13 +309,10 @@ function ReportsPage() {
               variant="primary"
               value={formType}
               onValueChange={changeFilter(setFormType)}
-              items={[
-                { value: "all", label: "All Form Types" },
-                ...formTypes.map((f) => ({
-                  value: f.id,
-                  label: f.name,
-                }))
-              ]}
+              items={formTypes.map((f) => ({
+                value: f.id,
+                label: f.name,
+              }))}
             />
           </div>
         </div>

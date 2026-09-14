@@ -87,6 +87,10 @@ function LocationsTab() {
           name: editing.name!,
           code: editing.code!.toUpperCase(),
           active: editing.active ?? true,
+          area: editing.area,
+          areaOwner: editing.areaOwner,
+          deptHead: editing.deptHead,
+          additional: editing.additional,
         },
       ]);
     }
@@ -133,6 +137,10 @@ function LocationsTab() {
               <th className="w-24 px-4 py-3 text-center font-semibold text-muted-foreground">Action</th>
               <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Location Name</th>
               <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Code</th>
+              <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Area</th>
+              <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Area Owner</th>
+              <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Dept Head</th>
+              <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Additional</th>
               <th className="px-4 py-3 text-center font-semibold text-muted-foreground">Status</th>
             </tr>
           </thead>
@@ -171,6 +179,10 @@ function LocationsTab() {
                     {loc.code}
                   </span>
                 </td>
+                <td className="px-4 py-3 text-muted-foreground">{loc.area || "-"}</td>
+                <td className="px-4 py-3 text-muted-foreground">{loc.areaOwner || "-"}</td>
+                <td className="px-4 py-3 text-muted-foreground">{loc.deptHead || "-"}</td>
+                <td className="px-4 py-3 text-muted-foreground">{loc.additional || "-"}</td>
                 <td className="px-4 py-3 text-center">
                   <StatusBadge active={loc.active} />
                 </td>
@@ -237,6 +249,63 @@ function LocationsTab() {
                   placeholder="BKS"
                 />
               </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium" htmlFor="loc-area">
+                  Area
+                </label>
+                <select
+                  id="loc-area"
+                  value={editing.area ?? ""}
+                  onChange={(e) => setEditing((p) => ({ ...p, area: e.target.value }))}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  <option value="">Select Area</option>
+                  {initialAreas.map(a => (
+                    <option key={a.id} value={a.name}>{a.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium" htmlFor="loc-area-owner">
+                  Area Owner (Email)
+                </label>
+                <input
+                  id="loc-area-owner"
+                  value={editing.areaOwner ?? ""}
+                  onChange={(e) => setEditing((p) => ({ ...p, areaOwner: e.target.value }))}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  placeholder="owner@example.com"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium" htmlFor="loc-dept-head">
+                  Dept Head (Email, comma-separated for multiple)
+                </label>
+                <input
+                  id="loc-dept-head"
+                  value={editing.deptHead ?? ""}
+                  onChange={(e) => setEditing((p) => ({ ...p, deptHead: e.target.value }))}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  placeholder="head1@example.com, head2@example.com"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium" htmlFor="loc-additional">
+                  Additional (Email, comma-separated for multiple)
+                </label>
+                <input
+                  id="loc-additional"
+                  value={editing.additional ?? ""}
+                  onChange={(e) => setEditing((p) => ({ ...p, additional: e.target.value }))}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  placeholder="other@example.com"
+                />
+              </div>
+
               <div className="flex items-center gap-2 pt-2">
                 <input
                   id="loc-active"

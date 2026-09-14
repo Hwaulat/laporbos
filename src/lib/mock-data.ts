@@ -20,14 +20,23 @@ export const formTypes: { id: FormTypeId; name: string; short: string }[] = [
 export const formName = (id: FormTypeId) =>
   formTypes.find((f) => f.id === id)?.name ?? id;
 
-export type Location = { id: string; name: string; code: string; active: boolean };
+export type Location = { 
+  id: string; 
+  name: string; 
+  code: string; 
+  active: boolean;
+  area?: string;
+  areaOwner?: string;
+  deptHead?: string;
+  additional?: string;
+};
 export type Area = { id: string; name: string; locationId?: string; locationIds?: string[]; active: boolean };
 export type Shift = { id: string; name: string; start: string; end: string; active: boolean };
 
 export const locations: Location[] = [
-  { id: "loc-1", name: "Plant Cikarang", code: "CKR", active: true },
-  { id: "loc-2", name: "Plant Karawang", code: "KRW", active: true },
-  { id: "loc-3", name: "Warehouse Marunda", code: "MRD", active: true },
+  { id: "loc-1", name: "Plant Cikarang", code: "CKR", active: true, area: "Assembly Line A", areaOwner: "owner1@example.com", deptHead: "head1@example.com", additional: "info1@example.com" },
+  { id: "loc-2", name: "Plant Karawang", code: "KRW", active: true, area: "Press Shop", areaOwner: "owner2@example.com", deptHead: "head2@example.com, head3@example.com", additional: "info2@example.com" },
+  { id: "loc-3", name: "Warehouse Marunda", code: "MRD", active: true, area: "Loading Dock", areaOwner: "owner3@example.com", deptHead: "head4@example.com", additional: "info3@example.com" },
   { id: "loc-4", name: "Head Office Jakarta", code: "HOJ", active: false },
 ];
 
