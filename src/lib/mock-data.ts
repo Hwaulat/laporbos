@@ -25,18 +25,23 @@ export type Location = {
   name: string; 
   code: string; 
   active: boolean;
-  area?: string;
-  areaOwner?: string;
-  deptHead?: string;
-  additional?: string;
 };
 export type Area = { id: string; name: string; locationId?: string; locationIds?: string[]; active: boolean };
 export type Shift = { id: string; name: string; start: string; end: string; active: boolean };
+export type EmailDistribution = {
+  id: string;
+  locationId: string;
+  ownerName: string;
+  ownerEmail: string;
+  deptHead: string;
+  additional: string;
+  active: boolean;
+};
 
 export const locations: Location[] = [
-  { id: "loc-1", name: "Plant Cikarang", code: "CKR", active: true, area: "Assembly Line A", areaOwner: "owner1@example.com", deptHead: "head1@example.com", additional: "info1@example.com" },
-  { id: "loc-2", name: "Plant Karawang", code: "KRW", active: true, area: "Press Shop", areaOwner: "owner2@example.com", deptHead: "head2@example.com, head3@example.com", additional: "info2@example.com" },
-  { id: "loc-3", name: "Warehouse Marunda", code: "MRD", active: true, area: "Loading Dock", areaOwner: "owner3@example.com", deptHead: "head4@example.com", additional: "info3@example.com" },
+  { id: "loc-1", name: "Plant Cikarang", code: "CKR", active: true },
+  { id: "loc-2", name: "Plant Karawang", code: "KRW", active: true },
+  { id: "loc-3", name: "Warehouse Marunda", code: "MRD", active: true },
   { id: "loc-4", name: "Head Office Jakarta", code: "HOJ", active: false },
 ];
 
@@ -54,6 +59,18 @@ export const shifts: Shift[] = [
   { id: "sh-1", name: "Shift 1", start: "07:00", end: "15:00", active: true },
   { id: "sh-2", name: "Shift 2", start: "15:00", end: "23:00", active: true },
   { id: "sh-3", name: "Shift 3", start: "23:00", end: "07:00", active: true },
+];
+
+export const emailDistributions: EmailDistribution[] = [
+  {
+    id: "ed-1",
+    locationId: "loc-1",
+    ownerName: "Agung Gumelar",
+    ownerEmail: "agung@rdl.co.id",
+    deptHead: "hendra@rdl.co.id, maria@rdl.co.id",
+    additional: "info@rdl.co.id",
+    active: true,
+  },
 ];
 
 export type Question = {

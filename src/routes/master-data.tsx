@@ -11,6 +11,7 @@ import {
   ToggleLeft,
   ToggleRight,
   LayoutDashboard,
+  Mail,
 } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { Tabs } from "@/components/custom-tabs";
@@ -19,9 +20,12 @@ import {
   locations as initialLocations,
   areas as initialAreas,
   shifts as initialShifts,
+  emailDistributions as initialEmailDistributions,
+  users,
   type Location,
   type Area,
   type Shift,
+  type EmailDistribution,
 } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/master-data")({
@@ -39,11 +43,12 @@ export const Route = createFileRoute("/master-data")({
   component: MasterDataPage,
 });
 
-type ActiveTab = "locations" | "areas" | "shifts";
+type ActiveTab = "locations" | "areas" | "email-distributions" | "shifts";
 
 const TABS: { id: ActiveTab; label: string; icon: typeof MapPin }[] = [
   { id: "locations", label: "Locations", icon: MapPin },
   { id: "areas", label: "Areas", icon: Building2 },
+  { id: "email-distributions", label: "Email Distribution", icon: Mail },
   { id: "shifts", label: "Shifts", icon: Clock },
 ];
 
@@ -87,10 +92,6 @@ function LocationsTab() {
           name: editing.name!,
           code: editing.code!.toUpperCase(),
           active: editing.active ?? true,
-          area: editing.area,
-          areaOwner: editing.areaOwner,
-          deptHead: editing.deptHead,
-          additional: editing.additional,
         },
       ]);
     }
@@ -137,10 +138,6 @@ function LocationsTab() {
               <th className="w-24 px-4 py-3 text-center font-semibold text-muted-foreground">Action</th>
               <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Location Name</th>
               <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Code</th>
-              <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Area</th>
-              <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Area Owner</th>
-              <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Dept Head</th>
-              <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Additional</th>
               <th className="px-4 py-3 text-center font-semibold text-muted-foreground">Status</th>
             </tr>
           </thead>
@@ -179,10 +176,6 @@ function LocationsTab() {
                     {loc.code}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-muted-foreground">{loc.area || "-"}</td>
-                <td className="px-4 py-3 text-muted-foreground">{loc.areaOwner || "-"}</td>
-                <td className="px-4 py-3 text-muted-foreground">{loc.deptHead || "-"}</td>
-                <td className="px-4 py-3 text-muted-foreground">{loc.additional || "-"}</td>
                 <td className="px-4 py-3 text-center">
                   <StatusBadge active={loc.active} />
                 </td>
@@ -247,62 +240,6 @@ function LocationsTab() {
                   }
                   className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm font-display font-bold uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-ring"
                   placeholder="BKS"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-sm font-medium" htmlFor="loc-area">
-                  Area
-                </label>
-                <select
-                  id="loc-area"
-                  value={editing.area ?? ""}
-                  onChange={(e) => setEditing((p) => ({ ...p, area: e.target.value }))}
-                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                >
-                  <option value="">Select Area</option>
-                  {initialAreas.map(a => (
-                    <option key={a.id} value={a.name}>{a.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-sm font-medium" htmlFor="loc-area-owner">
-                  Area Owner (Email)
-                </label>
-                <input
-                  id="loc-area-owner"
-                  value={editing.areaOwner ?? ""}
-                  onChange={(e) => setEditing((p) => ({ ...p, areaOwner: e.target.value }))}
-                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                  placeholder="owner@example.com"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-sm font-medium" htmlFor="loc-dept-head">
-                  Dept Head (Email, comma-separated for multiple)
-                </label>
-                <input
-                  id="loc-dept-head"
-                  value={editing.deptHead ?? ""}
-                  onChange={(e) => setEditing((p) => ({ ...p, deptHead: e.target.value }))}
-                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                  placeholder="head1@example.com, head2@example.com"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-sm font-medium" htmlFor="loc-additional">
-                  Additional (Email, comma-separated for multiple)
-                </label>
-                <input
-                  id="loc-additional"
-                  value={editing.additional ?? ""}
-                  onChange={(e) => setEditing((p) => ({ ...p, additional: e.target.value }))}
-                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                  placeholder="other@example.com"
                 />
               </div>
 
@@ -800,6 +737,284 @@ function ShiftsTab() {
   );
 }
 
+/* ─── Email Distributions tab ─────────────────────────────── */
+function EmailDistributionsTab({ locations }: { locations: Location[] }) {
+  const [items, setItems] = useState<EmailDistribution[]>(initialEmailDistributions);
+  const [editing, setEditing] = useState<Partial<EmailDistribution> | null>(null);
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  function save() {
+    if (!editing?.locationId || !editing?.ownerName) return;
+    if (editing.id) {
+      setItems((prev) =>
+        prev.map((e) => (e.id === editing.id ? { ...e, ...editing } as EmailDistribution : e)),
+      );
+    } else {
+      setItems((prev) => [
+        ...prev,
+        {
+          id: `ed-${Date.now()}`,
+          locationId: editing.locationId!,
+          ownerName: editing.ownerName!,
+          ownerEmail: editing.ownerEmail || "",
+          deptHead: editing.deptHead || "",
+          additional: editing.additional || "",
+          active: editing.active ?? true,
+        },
+      ]);
+    }
+    setEditing(null);
+  }
+
+  function toggle(id: string) {
+    setItems((prev) => prev.map((e) => (e.id === id ? { ...e, active: !e.active } : e)));
+  }
+
+  const locName = (id: string | undefined) => {
+    if (id) {
+      return locations.find(l => l.id === id)?.name ?? id;
+    }
+    return "-";
+  };
+
+  const filteredItems = items.filter(
+    (e) =>
+      !search ||
+      locName(e.locationId).toLowerCase().includes(search.toLowerCase()) ||
+      e.ownerName.toLowerCase().includes(search.toLowerCase()) ||
+      e.ownerEmail.toLowerCase().includes(search.toLowerCase())
+  );
+  const pagedItems = filteredItems.slice((page - 1) * pageSize, page * pageSize);
+
+  const handleOwnerNameChange = (name: string) => {
+    const user = users.find(u => u.name === name);
+    setEditing(p => ({
+      ...p,
+      ownerName: name,
+      ownerEmail: user ? user.email : p?.ownerEmail || ""
+    }));
+  };
+
+  return (
+    <div>
+      <div className="panel overflow-hidden">
+        <div className="p-4 pb-3 sm:p-5 sm:pb-4 border-b border-border [&>div]:!mb-0">
+          <TableToolbar
+            searchValue={search}
+            onSearchChange={(v) => { setSearch(v); setPage(1); }}
+            searchPlaceholder="Search email distributions…"
+            primaryAction={
+              <button
+                id="btn-add-email-distribution"
+                onClick={() => setEditing({ active: true })}
+                className="flex items-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+              >
+                <Plus className="h-4 w-4" />
+                Add Distribution
+              </button>
+            }
+          />
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-border bg-muted/50">
+              <th className="w-24 px-4 py-3 text-center font-semibold text-muted-foreground">Action</th>
+              <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Location</th>
+              <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Owner Name</th>
+              <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Owner Email</th>
+              <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Dept Head</th>
+              <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Additional</th>
+              <th className="px-4 py-3 text-center font-semibold text-muted-foreground">Status</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {pagedItems.map((ed) => (
+              <tr key={ed.id} className="hover:bg-muted/30 transition-colors">
+                <td className="px-4 py-3">
+                  <div className="flex items-center justify-center gap-2">
+                    <button
+                      id={`btn-edit-ed-${ed.id}`}
+                      onClick={() => setEditing({ ...ed })}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-transparent text-muted-foreground transition-colors hover:bg-muted hover:text-primary"
+                      title="Edit"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                    <button
+                      id={`btn-toggle-ed-${ed.id}`}
+                      onClick={() => toggle(ed.id)}
+                      className={`flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-transparent transition-colors hover:bg-muted ${
+                        ed.active ? "text-success hover:text-success/80" : "text-muted-foreground hover:text-foreground"
+                      }`}
+                      title={ed.active ? "Deactivate" : "Activate"}
+                    >
+                      {ed.active ? (
+                        <ToggleRight className="h-4 w-4" />
+                      ) : (
+                        <ToggleLeft className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
+                </td>
+                <td className="px-4 py-3 font-medium">{locName(ed.locationId)}</td>
+                <td className="px-4 py-3 text-muted-foreground">{ed.ownerName}</td>
+                <td className="px-4 py-3 text-muted-foreground">{ed.ownerEmail}</td>
+                <td className="px-4 py-3 text-muted-foreground">{ed.deptHead || "-"}</td>
+                <td className="px-4 py-3 text-muted-foreground">{ed.additional || "-"}</td>
+                <td className="px-4 py-3 text-center">
+                  <StatusBadge active={ed.active} />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        </div>
+        <Pagination
+          total={filteredItems.length}
+          page={page}
+          pageSize={pageSize}
+          onPageChange={setPage}
+          onPageSizeChange={(s) => { setPageSize(s); setPage(1); }}
+        />
+      </div>
+
+      {editing && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setEditing(null);
+          }}
+        >
+          <div className="panel w-full max-w-md overflow-hidden">
+            <div className="flex items-center justify-between border-b border-border px-6 py-4">
+              <h3 className="text-base font-semibold">
+                {editing.id ? "Edit Email Distribution" : "New Email Distribution"}
+              </h3>
+              <button
+                onClick={() => setEditing(null)}
+                className="rounded p-1 text-muted-foreground hover:bg-muted"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+              <div>
+                <label className="mb-1.5 block text-sm font-medium" htmlFor="ed-location">
+                  Location <span className="text-destructive">*</span>
+                </label>
+                <select
+                  id="ed-location"
+                  value={editing.locationId ?? ""}
+                  onChange={(e) => setEditing((p) => ({ ...p, locationId: e.target.value }))}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  <option value="">Select Location</option>
+                  {locations.map(l => (
+                    <option key={l.id} value={l.id}>{l.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium" htmlFor="ed-owner-name">
+                  Owner Name <span className="text-destructive">*</span>
+                </label>
+                <select
+                  id="ed-owner-name"
+                  value={editing.ownerName ?? ""}
+                  onChange={(e) => handleOwnerNameChange(e.target.value)}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  <option value="">Select Owner</option>
+                  {users.map(u => (
+                    <option key={u.id} value={u.name}>{u.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium" htmlFor="ed-owner-email">
+                  Owner Email
+                </label>
+                <input
+                  id="ed-owner-email"
+                  value={editing.ownerEmail ?? ""}
+                  readOnly
+                  className="w-full rounded-lg border border-border bg-muted/50 px-3 py-2 text-sm text-muted-foreground cursor-not-allowed focus:outline-none"
+                  placeholder="owner@example.com"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium" htmlFor="ed-dept-head">
+                  Dept Head (Email, comma-separated for multiple)
+                </label>
+                <input
+                  id="ed-dept-head"
+                  value={editing.deptHead ?? ""}
+                  onChange={(e) => setEditing((p) => ({ ...p, deptHead: e.target.value }))}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  placeholder="head1@example.com, head2@example.com"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium" htmlFor="ed-additional">
+                  Additional (Email, comma-separated for multiple)
+                </label>
+                <input
+                  id="ed-additional"
+                  value={editing.additional ?? ""}
+                  onChange={(e) => setEditing((p) => ({ ...p, additional: e.target.value }))}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  placeholder="other@example.com"
+                />
+              </div>
+
+              <div className="flex items-center gap-2 pt-2">
+                <input
+                  id="ed-active"
+                  type="checkbox"
+                  checked={editing.active ?? true}
+                  onChange={(e) => setEditing((p) => ({ ...p, active: e.target.checked }))}
+                  className="h-4 w-4 accent-primary"
+                />
+                <label className="cursor-pointer text-sm" htmlFor="ed-active">
+                  Active
+                </label>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 border-t border-border px-6 py-4">
+              <button
+                id="btn-cancel-ed"
+                onClick={() => setEditing(null)}
+                className="rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-muted"
+              >
+                Cancel
+              </button>
+              <button
+                id="btn-save-ed"
+                onClick={save}
+                disabled={!editing.locationId || !editing.ownerName}
+                className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+              >
+                <Check className="h-4 w-4" />
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ─── Page ───────────────────────────────────────────────────── */
 function MasterDataPage() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("locations");
@@ -838,6 +1053,9 @@ function MasterDataPage() {
       )}
       {activeTab === "areas" && (
         <AreasTab key="areas" locations={locations} />
+      )}
+      {activeTab === "email-distributions" && (
+        <EmailDistributionsTab key="email-distributions" locations={locations} />
       )}
       {activeTab === "shifts" && <ShiftsTab key="shifts" />}
     </AppShell>
