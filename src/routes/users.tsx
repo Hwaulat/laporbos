@@ -21,6 +21,8 @@ import { TableToolbar, FilterSelect, Pagination } from "@/components/table-ui";
 import {
   users as initialUsers,
   locations,
+  areas,
+  areaName,
   type User,
   type Role,
 } from "@/lib/mock-data";
@@ -229,6 +231,7 @@ function UsersPage() {
           entity: editing.entity || "-",
           allocation: editing.allocation || "-",
           locationId: editing.locationId || "loc-1",
+          areaId: editing.areaId,
           active: editing.active ?? true,
         },
       ]);
@@ -374,6 +377,7 @@ function UsersPage() {
                       <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">Role</th>
                       <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">Team</th>
                       <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">Position</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">Area</th>
                       <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">Allocation</th>
                     </tr>
                   </thead>
@@ -411,6 +415,7 @@ function UsersPage() {
                         <td className="px-4 py-3 text-muted-foreground">{user.role}</td>
                         <td className="px-4 py-3">{user.team}</td>
                         <td className="px-4 py-3 text-muted-foreground">{user.entity}</td>
+                        <td className="px-4 py-3 text-muted-foreground">{user.areaId ? areaName(user.areaId) : "-"}</td>
                         <td className="px-4 py-3 text-muted-foreground">{user.allocation}</td>
                       </tr>
                     ))}
@@ -547,6 +552,26 @@ function UsersPage() {
                         {ENTITIES.map((e) => (
                           <option key={e} value={e}>
                             {e}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="mb-1.5 block text-sm font-medium" htmlFor="user-area">
+                        Area
+                      </label>
+                      <select
+                        id="user-area"
+                        value={editing.areaId ?? ""}
+                        onChange={(e) =>
+                          setEditing((p) => ({ ...p, areaId: e.target.value }))
+                        }
+                        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                      >
+                        <option value="">Select area…</option>
+                        {areas.map((a) => (
+                          <option key={a.id} value={a.id}>
+                            {a.name}
                           </option>
                         ))}
                       </select>

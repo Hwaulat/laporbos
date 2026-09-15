@@ -262,14 +262,14 @@ function pad(n: number) {
 }
 
 export const reports: Report[] = Array.from({ length: 48 }).map((_, i) => {
-  const form = formTypes[i % formTypes.length];
-  const area = areas[i % areas.length];
-  const shift = shifts[i % shifts.length];
+  const form = formTypes[i % formTypes.length]!;
+  const area = areas[i % areas.length]!;
+  const shift = shifts[i % shifts.length]!;
   const status: ReportStatus = i % 3 === 0 ? "Closed" : "Open";
   const day = 28 - (i % 28);
   const submittedAt = `2026-09-${pad(day).slice(1)}T${pad(7 + (i % 12)).slice(1)}:${i % 2 ? "30" : "05"}:00`;
-  const reporter = reporters[i % reporters.length];
-  const summary = summaries[i % summaries.length];
+  const reporter = reporters[i % reporters.length]!;
+  const summary = summaries[i % summaries.length]!;
 
   return {
     id: `rep-${i + 1}`,
@@ -277,7 +277,7 @@ export const reports: Report[] = Array.from({ length: 48 }).map((_, i) => {
     formType: form.id,
     submittedAt,
     reporter,
-    locationId: area.locationId,
+    locationId: area.locationId || "loc-1",
     areaId: area.id,
     shiftId: shift.id,
     status,
@@ -290,7 +290,7 @@ export const reports: Report[] = Array.from({ length: 48 }).map((_, i) => {
           q.inputType === "number"
             ? String(2 + (i % 7))
             : q.options
-              ? q.options[i % q.options.length]
+              ? q.options[i % q.options.length]!
               : summary,
       })),
     history:
@@ -318,6 +318,7 @@ export type User = {
   entity: string;
   allocation: string;
   locationId: string;
+  areaId?: string | undefined;
   active: boolean;
 };
 

@@ -16,7 +16,7 @@ import {
   shifts,
 } from "@/lib/mock-data";
 
-type Search = { formType?: string };
+type Search = { formType?: string | undefined };
 
 export const Route = createFileRoute("/reports/")({
   validateSearch: (search: Record<string, unknown>): Search => ({
